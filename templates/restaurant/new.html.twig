@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau restaurant{% endblock %}
+
+{% block body %}
+    <h1>Créer un restaurant</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+
+        <button type="submit">Créer</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_restaurant') }}">Retour</a>
+{% endblock %}
