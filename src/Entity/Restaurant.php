@@ -6,6 +6,7 @@ use App\Repository\RestaurantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RestaurantRepository::class)]
 class Restaurant
@@ -16,10 +17,12 @@ class Restaurant
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le nom du restaurant est obligatoire.')]
     private ?string $nom = null;
 
     #[ORM\ManyToOne(inversedBy: 'restaurants')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'La ville est obligatoire.')]
     private ?Ville $ville = null;
 
     /**
@@ -29,9 +32,16 @@ class Restaurant
     private Collection $commentaires;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'La description est obligatoire.')]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'La note est obligatoire.')]
+    #[Assert\Range(
+    min: 1,
+    max: 5,
+    notInRangeMessage: 'La note doit être comprise entre {{ min }} et {{ max }}.'
+    )]
     private ?int $rating = null;
 
     public function __construct()

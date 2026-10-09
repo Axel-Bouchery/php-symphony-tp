@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CommentaireRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CommentaireRepository::class)]
 class Commentaire
@@ -15,9 +16,16 @@ class Commentaire
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le contenu est obligatoire.')]
     private ?string $contenu = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'La note est obligatoire.')]
+    #[Assert\Range(
+    min: 1,
+    max: 5,
+    notInRangeMessage: 'La note doit être comprise entre {{ min }} et {{ max }}.'
+    )]
     private ?int $note = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -25,6 +33,7 @@ class Commentaire
 
     #[ORM\ManyToOne(inversedBy: 'commentaires')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Le restaurant est obligatoire.')]
     private ?Restaurant $restaurant = null;
 
     public function getId(): ?int

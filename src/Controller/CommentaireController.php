@@ -33,6 +33,8 @@ final class CommentaireController extends AbstractController
             $entityManager->persist($commentaire);
             $entityManager->flush();
 
+            $this->addFlash('success', 'Commentaire créée avec succès.');
+
             return $this->redirectToRoute('app_commentaire');
         }
 
@@ -40,4 +42,34 @@ final class CommentaireController extends AbstractController
             'form' => $form,
         ]);
     }
+
+    #[Route('/commentaire/{id}/edit', name: 'app_commentaire_edit')]
+        public function edit(
+        int $id,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $commentaire = $entityManager->getRepository(Commentaire::class)->find($id);
+
+        if (!$commentaire) {
+            throw $this->createNotFoundException('Commentaire non trouvé.');
+        }
+
+        $form = $this->createForm(CommentaireType::class, $commentaire);
+        $form->handleRequest($request);
+
+         if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Commentaire modifié avec succès.');
+
+            return $this->redirectToRoute('app_commentaire');
+        }
+
+        return $this->render('commentaire/edit.html.twig', [
+            'form' => $form,
+            'commentaire' => $commentaire,
+        ]);
+}
+
 }

@@ -32,11 +32,42 @@ final class VilleController extends AbstractController
             $entityManager->persist($ville);
             $entityManager->flush();
 
+            $this->addFlash('success', 'Ville créée avec succès.');
+
             return $this->redirectToRoute('app_ville');
         }
 
         return $this->render('ville/new.html.twig', [
             'form' => $form,
+        ]);
+    }
+
+    #[Route('/ville/{id}/edit', name: 'app_ville_edit')]
+    public function edit(
+            int $id,
+            Request $request,
+            EntityManagerInterface $entityManager
+    ): Response {
+        $ville = $entityManager->getRepository(Ville::class)->find($id);
+
+        if (!$ville) {
+            throw $this->createNotFoundException('Ville non trouvée.');
+        }
+
+        $form = $this->createForm(VilleType::class, $ville);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Ville modifiée avec succès.');
+
+            return $this->redirectToRoute('app_ville');
+        }
+
+        return $this->render('ville/edit.html.twig', [
+            'form' => $form,
+            'ville' => $ville,
         ]);
     }
 }

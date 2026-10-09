@@ -32,6 +32,8 @@ final class RestaurantController extends AbstractController
             $entityManager->persist($restaurant);
             $entityManager->flush();
 
+            $this->addFlash('success', 'Restaurant créé avec succès.');
+
             return $this->redirectToRoute('app_restaurant');
         }
 
@@ -39,4 +41,35 @@ final class RestaurantController extends AbstractController
             'form' => $form,
         ]);
     }
+
+    #[Route('/restaurant/{id}/edit', name: 'app_restaurant_edit')]
+    public function edit(
+        int $id,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $restaurant = $entityManager->getRepository(Restaurant::class)->find($id);
+
+        if (!$restaurant) {
+            throw $this->createNotFoundException('Restaurant non trouvé.');
+        }
+
+        $form = $this->createForm(RestaurantType::class, $restaurant);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Restaurant modifié avec succès.');
+
+            return $this->redirectToRoute('app_restaurant');
+        }
+
+        return $this->render('restaurant/edit.html.twig', [
+            'form' => $form,
+            'restaurant' => $restaurant,
+        ]);
+    }
 }
+
+
