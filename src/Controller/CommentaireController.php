@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Message\NouveauCommentaire;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 final class CommentaireController extends AbstractController
 {
@@ -30,7 +32,8 @@ final class CommentaireController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function new(
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        MessageBusInterface $messageBus
     ): Response {
         $commentaire = new Commentaire();
         $commentaire->setDate(new \DateTime());
@@ -50,7 +53,11 @@ final class CommentaireController extends AbstractController
             $entityManager->persist($commentaire);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Commentaire créé avec succès.');
+            $messageBus->dispatch(
+            new NouveauCommentaire($commentaire->getId())
+        );
+
+        $this->addFlash('success', 'Commentaire créé avec succès.');
 
             return $this->redirectToRoute('app_commentaire');
         }
