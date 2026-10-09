@@ -10,18 +10,24 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class CommentaireController extends AbstractController
 {
     #[Route('/commentaire', name: 'app_commentaire')]
-    public function index(): Response
+    public function index(EntityManagerInterface $entityManager): Response
     {
+        $commentaires = $entityManager
+            ->getRepository(Commentaire::class)
+            ->findAll();
+
         return $this->render('commentaire/index.html.twig', [
-            'controller_name' => 'CommentaireController',
+            'commentaires' => $commentaires,
         ]);
     }
 
     #[Route('/commentaire/new', name: 'app_commentaire_new')]
+    #[IsGranted('ROLE_USER')]
     public function new(
         Request $request,
         EntityManagerInterface $entityManager
@@ -54,10 +60,9 @@ final class CommentaireController extends AbstractController
         ]);
     }
 
-    #[Route('/commentaire/{id}/edit', name: 'app_commentaire_edit')]
-    public function edit(
+        #[Route('/commentaire/{id}/delete', name: 'app_commentaire_delete')]
+    public function delete(
         int $id,
-        Request $request,
         EntityManagerInterface $entityManager
     ): Response {
         $commentaire = $entityManager
@@ -68,20 +73,17 @@ final class CommentaireController extends AbstractController
             throw $this->createNotFoundException('Commentaire non trouvé.');
         }
 
-        $form = $this->createForm(CommentaireType::class, $commentaire);
-        $form->handleRequest($request);
+        $user = $this->getUser();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Commentaire modifié avec succès.');
-
-            return $this->redirectToRoute('app_commentaire');
+        if ($commentaire->getUser() !== $user && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException();
         }
 
-        return $this->render('commentaire/edit.html.twig', [
-            'form' => $form,
-            'commentaire' => $commentaire,
-        ]);
+        $entityManager->remove($commentaire);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Commentaire supprimé avec succès.');
+
+        return $this->redirectToRoute('app_commentaire');
     }
 }

@@ -1,20 +1,33 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello CommentaireController!{% endblock %}
+{% block title %}Commentaires{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    <h1>Commentaires</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    {% if is_granted('ROLE_USER') %}
+        <p>
+            <a href="{{ path('app_commentaire_new') }}">Ajouter un commentaire</a>
+        </p>
+    {% endif %}
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/phphamza/projet_doctrine/src/Controller/CommentaireController.php</code></li>
-        <li>Your template at <code>/home/phphamza/projet_doctrine/templates/commentaire/index.html.twig</code></li>
-    </ul>
-</div>
+    {% if commentaires is empty %}
+        <p>Aucun commentaire enregistré.</p>
+    {% else %}
+        <ul>
+            {% for commentaire in commentaires %}
+                <li>
+                    <strong>{{ commentaire.user.email }}</strong>
+                    - {{ commentaire.contenu }}
+                    - Note : {{ commentaire.note }}/5
+
+                    {% if is_granted('ROLE_ADMIN') or commentaire.user == app.user %}
+                        <a href="{{ path('app_commentaire_delete', {id: commentaire.id}) }}">
+                            Supprimer
+                        </a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endblock %}

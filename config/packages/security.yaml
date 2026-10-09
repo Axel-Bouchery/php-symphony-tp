@@ -35,10 +35,13 @@ security:
             # switch_user: true
 
     # Note: Only the *first* matching rule is applied
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_USER
+
     access_control:
-    - { path: ^/restaurant, roles: ROLE_USER }
+        - { path: ^/admin, roles: ROLE_ADMIN }
 when@test:
-    security:
+     security:
         password_hashers:
             # Password hashers are resource-intensive by design to ensure security.
             # In tests, it's safe to reduce their cost to improve performance.
