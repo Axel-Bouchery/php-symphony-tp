@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Commentaire;
+use App\Entity\User;
 use App\Form\CommentaireType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,8 +22,10 @@ final class CommentaireController extends AbstractController
     }
 
     #[Route('/commentaire/new', name: 'app_commentaire_new')]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
         $commentaire = new Commentaire();
         $commentaire->setDate(new \DateTime());
 
@@ -30,10 +33,18 @@ final class CommentaireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $user = $this->getUser();
+
+            if (!$user instanceof User) {
+                throw $this->createAccessDeniedException();
+            }
+
+            $commentaire->setUser($user);
+
             $entityManager->persist($commentaire);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Commentaire créée avec succès.');
+            $this->addFlash('success', 'Commentaire créé avec succès.');
 
             return $this->redirectToRoute('app_commentaire');
         }
@@ -44,12 +55,14 @@ final class CommentaireController extends AbstractController
     }
 
     #[Route('/commentaire/{id}/edit', name: 'app_commentaire_edit')]
-        public function edit(
+    public function edit(
         int $id,
         Request $request,
         EntityManagerInterface $entityManager
     ): Response {
-        $commentaire = $entityManager->getRepository(Commentaire::class)->find($id);
+        $commentaire = $entityManager
+            ->getRepository(Commentaire::class)
+            ->find($id);
 
         if (!$commentaire) {
             throw $this->createNotFoundException('Commentaire non trouvé.');
@@ -58,7 +71,7 @@ final class CommentaireController extends AbstractController
         $form = $this->createForm(CommentaireType::class, $commentaire);
         $form->handleRequest($request);
 
-         if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
             $this->addFlash('success', 'Commentaire modifié avec succès.');
@@ -70,6 +83,5 @@ final class CommentaireController extends AbstractController
             'form' => $form,
             'commentaire' => $commentaire,
         ]);
-}
-
+    }
 }
