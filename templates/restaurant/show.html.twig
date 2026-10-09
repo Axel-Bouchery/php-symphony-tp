@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ restaurant.nom }}{% endblock %}
+
+{% block body %}
+
+    <h1>{{ restaurant.nom }}</h1>
+    <p>
+        <strong>Description :</strong>
+        {{ restaurant.description }}
+    </p>
+    <p>
+        <strong>Rating :</strong>
+        {{ restaurant.rating }}/5
+    </p>
+    <p>
+        <strong>Ville :</strong>
+        {{ restaurant.ville.nom }}
+    </p>
+    <hr>
+    <h2>Commentaires</h2>
+
+    {% for commentaire in restaurant.commentaires %}
+        <div>
+            <p>{{ commentaire.contenu }}</p>
+            <p>Note : {{ commentaire.note }}/5</p>
+            <p>Date : {{ commentaire.date|date('d/m/Y') }}</p>
+
+            <a href="{{ path('app_commentaire_delete', {id: commentaire.id}) }}"
+                onclick="return confirm('Voulez-vous vraiment supprimer ce commentaire ?');">
+                Supprimer
+            </a>
+
+        </div>
+        <hr>
+    {% else %}
+        <p>Aucun commentaire.</p>
+    {% endfor %}
+
+    <a href="{{ path('app_commentaire_new', {id: restaurant.id}) }}">
+        Ajouter un commentaire
+    </a>
+
+{% endblock %}

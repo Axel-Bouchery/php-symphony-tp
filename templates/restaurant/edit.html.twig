@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+{% block title %}Modifier un restaurant{% endblock %}
+{% block body %}
+    <h1>Modifier un restaurant</h1>
+    {{ form_start(form) }}
+
+        {{ form_row(form.nom) }}
+        {{ form_row(form.description) }}
+        {{ form_row(form.rating) }}
+        {{ form_row(form.ville) }}
+
+        <button type="submit">Modifier</button>
+    {{ form_end(form) }}
+{% endblock %}
